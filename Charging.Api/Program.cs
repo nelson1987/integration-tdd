@@ -1,3 +1,4 @@
+using Charging.Api;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -13,37 +14,43 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet($"/api/teste/{int:id}", (int id) =>
-{
-    return Results.Ok(new Usuario
+app.MapGet("/api/teste/{id}", (int id) =>
+    {
+        return Results.Ok(new Usuario
         {
             Id = id,
             Nome = "João Silva",
             Email = "joao@email.com",
             DataCriacao = DateTime.Now
         });
-})
-.WithName("GetTeste")
-.WithOpenApi();
+    })
+    .WithName("GetTesteById")
+    .WithOpenApi();
 
 app.MapGet($"/api/teste", () =>
-{
-    return Results.Ok(new List<Usuario>
+    {
+        return Results.Ok(new List<Usuario>
         {
             new() { Id = 1, Nome = "João Silva", Email = "joao@email.com", DataCriacao = DateTime.Now },
             new() { Id = 2, Nome = "Maria Santos", Email = "maria@email.com", DataCriacao = DateTime.Now }
         });
-})
-.WithName("GetTeste")
-.WithOpenApi();
+    })
+    .WithName("GetTeste")
+    .WithOpenApi();
 
 await app.RunAsync();
 
-public partial class Program { }
-public class Usuario
+namespace Charging.Api
 {
-    public int Id { get; set; }
-    public string Nome { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public DateTime DataCriacao { get; set; }
+    public class Program
+    {
+    }
+
+    public class Usuario
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public DateTime DataCriacao { get; set; }
+    }
 }
