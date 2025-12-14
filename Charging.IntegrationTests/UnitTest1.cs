@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using Charging.Api;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -64,7 +63,7 @@ public class UnitTest1 : IClassFixture<ApiFactory>
         response.Count.ShouldBe(2);
     }
 }
-/*
+
 // public static class ModuleInitializer
 // {
 //     [ModuleInitializer]
@@ -109,10 +108,10 @@ public class UsuariosIntegrationTests : IClassFixture<WebApplicationFactory<Prog
     {
         // Act
         var response = await _client.GetAsync("/api/usuarios");
-        var usuarios = await response.Content.ReadFromJsonAsync<List<Usuario>>();
+        //var usuarios = await response.Content.ReadFromJsonAsync<List<Usuario>>();
 
         // Assert
-        await Verify(usuarios)
+        await Verify(response)
             .IgnoreMember<Usuario>(u => u.DataCriacao);
     }
 
@@ -140,7 +139,7 @@ public class UsuariosIntegrationTests : IClassFixture<WebApplicationFactory<Prog
     }
 }
 
-
+/*
 public class UnitTest1 : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;

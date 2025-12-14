@@ -1,4 +1,3 @@
-using Charging.Api;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -40,17 +39,12 @@ app.MapGet($"/api/teste", () =>
 
 await app.RunAsync();
 
-namespace Charging.Api
+public class Usuario
 {
-    public class Program
-    {
-    }
-
-    public class Usuario
-    {
-        public int Id { get; set; }
-        public string Nome { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public DateTime DataCriacao { get; set; }
-    }
+    public int Id { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public DateTime DataCriacao { get; set; }
 }
+
+public partial class Program { }
