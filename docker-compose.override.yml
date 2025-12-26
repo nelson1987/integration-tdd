@@ -1,0 +1,15 @@
+version: '3.8'
+
+# Arquivo de override para desenvolvimento local
+services:
+  api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    # Volumes comentados para usar os arquivos compilados do Dockerfile
+    # Descomente apenas se precisar de hot reload durante desenvolvimento
+    # volumes:
+    #   - ./Charging.Api:/app
+    #   - /app/bin
+    #   - /app/obj
+

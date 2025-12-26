@@ -1,19 +1,22 @@
 using System.Net;
 using System.Net.Http.Json;
+
 using Charging.Api.Data;
 using Charging.Api.Models;
+
 using Microsoft.EntityFrameworkCore;
+
 using Shouldly;
 
 namespace Charging.IntegrationTests;
 
 [Collection("GuidCollection")]
-public class UnitTest1
+public class GetIntegrationTests
 {
     private readonly HttpClient _client;
     private readonly ApplicationDbContext _context;
 
-    public UnitTest1(ApiFixture fixture)
+    public GetIntegrationTests(ApiFixture fixture)
     {
         _client = fixture._client;
         _context = fixture._context;
@@ -23,9 +26,13 @@ public class UnitTest1
     public async Task ListarTestes_QuandoTesteExistir_DeveRetornarListaTestes()
     {
         await _context.Usuarios.AddAsync(new Usuario()
-        { Email = $"email-{Guid.NewGuid()}@email.com", Nome = "Nome usuario", 
-            DataCriacao = DateTime.UtcNow });
+        {
+            Email = $"email-{Guid.NewGuid()}@email.com", 
+            Nome = "Nome usuario", 
+            DataCriacao = DateTime.UtcNow
+        });
         await _context.SaveChangesAsync();
+        
         var result = await _client.GetAsync("/api/usuarios");
         result.EnsureSuccessStatusCode();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);

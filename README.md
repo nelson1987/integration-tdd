@@ -174,8 +174,61 @@ Os testes de integração utilizam:
 ### Pré-requisitos
 
 - **.NET 8.0 SDK** instalado
-- **Docker Desktop** instalado e em execução (para testes de integração)
-- **SQL Server** (para execução local da API)
+- **Docker Desktop** instalado e em execução
+- **SQL Server** (opcional - pode usar Docker)
+
+### 🐳 Opção 1: Docker (Recomendado)
+
+**Passo 1: Configurar variáveis de ambiente (primeira vez)**
+
+```powershell
+# Windows
+.\setup-env.ps1
+
+# Linux/Mac
+./setup-env.sh
+```
+
+**Passo 2: Iniciar tudo com um comando**
+
+```powershell
+# Windows
+.\docker-run.ps1 up
+
+# Linux/Mac
+./docker-run.sh up
+```
+
+Isso irá:
+- ✅ Iniciar SQL Server em container
+- ✅ Criar o banco de dados automaticamente
+- ✅ Iniciar a API
+- ✅ Configurar rede entre containers
+
+**Passo 3: Executar testes k6**
+
+```powershell
+# Smoke test
+.\docker-run.ps1 test-smoke
+
+# Load test
+.\docker-run.ps1 test-load
+
+# Todos os testes
+.\docker-run.ps1 test
+```
+
+**Acessar:**
+- API: http://localhost:5254
+- Swagger: http://localhost:5254/swagger
+- SQL Server: localhost:1433 (sa / yourStrong(!)Password123)
+
+📖 **Documentação completa:** 
+- [ENV-SETUP.md](ENV-SETUP.md) - Variáveis de ambiente
+- [DOCKER.md](DOCKER.md) - Docker
+- [DOCKER-QUICKSTART.md](DOCKER-QUICKSTART.md) - Guia rápido
+
+### Opção 2: Execução Local
 
 ### Executar a API
 

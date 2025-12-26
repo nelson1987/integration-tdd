@@ -1,0 +1,9 @@
+# Pasta para resultados dos testes k6
+
+Os resultados dos testes executados via Docker serão salvos aqui.
+
+Arquivos gerados:
+- smoke-results.json
+- load-results.json  
+- stress-results.json
+
