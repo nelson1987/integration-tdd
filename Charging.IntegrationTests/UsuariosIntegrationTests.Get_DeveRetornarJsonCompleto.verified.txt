@@ -1,0 +1,6 @@
+﻿{
+  dataCriacao: {Scrubbed},
+  email: joao@email.com,
+  id: 1,
+  nome: João Silva
+}

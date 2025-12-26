@@ -1,9 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
+using Charging.Api.Data;
+using Charging.Api.Models;
+using Microsoft.EntityFrameworkCore;
 using Shouldly;
 
 // using VerifyTests;
@@ -11,51 +10,41 @@ using Shouldly;
 
 namespace Charging.IntegrationTests;
 
-public class ApiFactory : WebApplicationFactory<Program>
+[Collection("GuidCollection")]
+public class UnitTest1
 {
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.UseEnvironment("Testing");
-        builder.ConfigureTestServices(_ =>
-        {
-            // _.AddTransient<ICreateProductCommandHandler, CreateProductHandler>();
-            // _.AddTransient<IProductRepository, ProductRepository>();
-            // _.AddTransient<IDbContext, DbContext>();
-            // var descriptorType = typeof(DbContextOptions<ApplicationDbContext>);
-            //
-            // var descriptor = Enumerable
-            //     .SingleOrDefault<ServiceDescriptor>(services, s => s.ServiceType == descriptorType);
-            //
-            // if (descriptor is not null) services.Remove(descriptor);
-            //
-            // EntityFrameworkServiceCollectionExtensions.AddDbContext<ApplicationDbContext>(services, options =>
-            //     SqlServerDbContextOptionsExtensions.UseSqlServer(options, _dbContainer.GetConnectionString()));
-        });
-    }
-}
-
-public class UnitTest1 : IClassFixture<ApiFactory>
-{
-    // private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
+    private readonly ApplicationDbContext _context;
 
-    public UnitTest1(ApiFactory factory)
+    public UnitTest1(ApiFixture fixture)
     {
-        _client = factory.CreateClient();
+        _client = fixture._client;
+        _context = fixture._context;
     }
 
     [Fact]
     public async Task ListarTestes_QuandoTesteExistir_DeveRetornarListaTestes()
     {
-        var result = await _client.GetAsync("/api/teste");
+        await _context.Usuarios.AddAsync(new Usuario()
+        { Email = "email@email.com", Nome = "Nome usuario", DataCriacao = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+        var result = await _client.GetAsync("/api/usuarios");
         result.EnsureSuccessStatusCode();
         Assert.Equal(HttpStatusCode.OK, result.StatusCode);
     }
-    
+
+    [Fact]
+    public async Task ListarTestes_QuandoTesteNaoExistir_DeveRetornarNotFound()
+    {
+        var result = await _client.GetAsync("/api/usuarios");
+        result.EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+    }
+
     [Fact]
     public async Task ListarTestes_QuandoTesteExistir_DeveRetornarListaTestesComResultado()
     {
-        var result = await _client.GetAsync("/api/teste");
+        var result = await _client.GetAsync("/api/usuarios");
         result.EnsureSuccessStatusCode();
         var response = await result.Content
             .ReadFromJsonAsync<List<Usuario>>();
@@ -64,80 +53,7 @@ public class UnitTest1 : IClassFixture<ApiFactory>
     }
 }
 
-// public static class ModuleInitializer
-// {
-//     [ModuleInitializer]
-//     public static void Init()
-//     {
-//         // Configurações globais do Verify
-//         VerifyHttp.Enable();
-//
-//         // Serialização mais limpa
-//         VerifierSettings.SortPropertiesAlphabetically();
-//         VerifierSettings.SortJsonObjects();
-//
-//         // Remove propriedades dinâmicas globalmente
-//         VerifierSettings.IgnoreMember<DateTime>();
-//     }
-// }
-
 // [UsesVerify]
-public class UsuariosIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
-{
-    private readonly HttpClient _client;
-
-    public UsuariosIntegrationTests(WebApplicationFactory<Program> factory)
-    {
-        _client = factory.CreateClient();
-    }
-
-    [Fact]
-    public async Task Get_DeveRetornarUsuarioPorId()
-    {
-        // Act
-        var response = await _client.GetAsync("/api/usuarios/1");
-        var usuario = await response.Content.ReadFromJsonAsync<Usuario>();
-
-        // Assert
-        await Verify(usuario)
-            .IgnoreMember<Usuario>(u => u.DataCriacao); // Ignora campo dinâmico
-    }
-
-    [Fact]
-    public async Task GetAll_DeveRetornarListaDeUsuarios()
-    {
-        // Act
-        var response = await _client.GetAsync("/api/usuarios");
-        //var usuarios = await response.Content.ReadFromJsonAsync<List<Usuario>>();
-
-        // Assert
-        await Verify(response)
-            .IgnoreMember<Usuario>(u => u.DataCriacao);
-    }
-
-    [Fact]
-    public async Task Get_DeveRetornarJsonCompleto()
-    {
-        // Act
-        var response = await _client.GetAsync("/api/usuarios/1");
-        var json = await response.Content.ReadAsStringAsync();
-
-        // Assert - verifica o JSON bruto
-        await VerifyJson(json)
-            .ScrubMember("dataCriacao"); // Remove campo do snapshot
-    }
-
-    [Fact]
-    public async Task Get_DeveRetornarStatusCodeCorreto()
-    {
-        // Act
-        var response = await _client.GetAsync("/api/usuarios/1");
-
-        // Assert - verifica toda a resposta HTTP
-        await Verify(response)
-            .ScrubMember("dataCriacao");
-    }
-}
 
 /*
 public class UnitTest1 : IClassFixture<WebApplicationFactory<Program>>

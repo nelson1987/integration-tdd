@@ -1,4 +1,13 @@
+using Charging.Api.Data;
+using Charging.Api.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -13,38 +22,33 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/api/teste/{id}", (int id) =>
-    {
-        return Results.Ok(new Usuario
+app.MapGet("/api/usuarios/{id}",
+        async ([FromRoute] int id, [FromServices] ApplicationDbContext db) =>
         {
-            Id = id,
-            Nome = "João Silva",
-            Email = "joao@email.com",
-            DataCriacao = DateTime.Now
-        });
-    })
-    .WithName("GetTesteById")
+            var usuario = await db.Usuarios.FindAsync(id); // is { } usuario
+            return usuario != null
+                ? Results.Ok(usuario)
+                : Results.NotFound();
+        })
+    .WithName("GetUsuarioById")
     .WithOpenApi();
 
-app.MapGet($"/api/teste", () =>
+app.MapGet("/api/usuarios",
+        async (ApplicationDbContext db) => await db.Usuarios.ToListAsync())
+    .WithName("GetUsuarios")
+    .WithOpenApi();
+
+app.MapPost("/api/usuarios", async (Usuario usuario, ApplicationDbContext db) =>
     {
-        return Results.Ok(new List<Usuario>
-        {
-            new() { Id = 1, Nome = "João Silva", Email = "joao@email.com", DataCriacao = DateTime.Now },
-            new() { Id = 2, Nome = "Maria Santos", Email = "maria@email.com", DataCriacao = DateTime.Now }
-        });
+        db.Usuarios.Add(usuario);
+        await db.SaveChangesAsync();
+        return Results.Created($"/api/usuarios/{usuario.Id}", usuario);
     })
-    .WithName("GetTeste")
+    .WithName("CreateUsuario")
     .WithOpenApi();
 
 await app.RunAsync();
 
-public class Usuario
+public partial class Program
 {
-    public int Id { get; set; }
-    public string Nome { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public DateTime DataCriacao { get; set; }
 }
-
-public partial class Program { }
