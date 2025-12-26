@@ -20,7 +20,7 @@ public class UsuariosIntegrationTests
         var novoUsuario = new Usuario
         {
             Nome = "José Carlos",
-            Email = "jose@email.com"
+            Email = $"jose-{Guid.NewGuid()}@email.com"
         };
 
         // Act
@@ -30,7 +30,8 @@ public class UsuariosIntegrationTests
         // Assert
         await Verify(usuarioCriado)
             .IgnoreMember<Usuario>(u => u.Id)
-            .IgnoreMember<Usuario>(u => u.DataCriacao);
+            .IgnoreMember<Usuario>(u => u.DataCriacao)
+            .IgnoreMember<Usuario>(u => u.Email);
     }
 
     [Fact]
@@ -40,7 +41,7 @@ public class UsuariosIntegrationTests
         var novoUsuario = new Usuario
         {
             Nome = "José Carlos",
-            Email = "jose@email.com"
+            Email = $"jose-{Guid.NewGuid()}@email.com"
         };
         var responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
         var usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
@@ -51,22 +52,24 @@ public class UsuariosIntegrationTests
 
         // Assert
         await Verify(usuario)
-            .IgnoreMember<Usuario>(u => u.DataCriacao); // Ignora campo dinâmico
+            .IgnoreMember<Usuario>(u => u.DataCriacao)
+            .IgnoreMember<Usuario>(u => u.Email); // Ignora campo dinâmico
     }
 
     [Fact]
     public async Task GetAll_DeveRetornarListaDeUsuarios()
     {
         // Arrange
+        var guid = Guid.NewGuid();
         var novoUsuario1 = new Usuario
         {
             Nome = "José Carlos",
-            Email = "jose@email.com"
+            Email = $"jose-{guid}@email.com"
         };
         var novoUsuario2 = new Usuario
         {
             Nome = "Maria Eduarda",
-            Email = "maria@email.com"
+            Email = $"maria-{guid}@email.com"
         };
         await _client.PostAsJsonAsync("/api/usuarios", novoUsuario1);
         await _client.PostAsJsonAsync("/api/usuarios", novoUsuario2);
@@ -78,7 +81,8 @@ public class UsuariosIntegrationTests
         // Assert
         await Verify(usuarios)
             .IgnoreMember<Usuario>(u => u.DataCriacao)
-            .IgnoreMember<Usuario>(u => u.Id);
+            .IgnoreMember<Usuario>(u => u.Id)
+            .IgnoreMember<Usuario>(u => u.Email);
     }
 
     [Fact]
@@ -88,7 +92,7 @@ public class UsuariosIntegrationTests
         var novoUsuario = new Usuario
         {
             Nome = "José Carlos",
-            Email = "jose@email.com"
+            Email = $"jose-{Guid.NewGuid()}@email.com"
         };
         var responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
         var usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
@@ -100,7 +104,8 @@ public class UsuariosIntegrationTests
         // Assert - verifica o JSON bruto
         await VerifyJson(json)
             .ScrubMember("dataCriacao") // Remove campo do snapshot
-            .ScrubMember("id");
+            .ScrubMember("id")
+            .ScrubMember("email");
     }
 
     [Fact]
@@ -110,7 +115,7 @@ public class UsuariosIntegrationTests
         var novoUsuario = new Usuario
         {
             Nome = "José Carlos",
-            Email = "jose@email.com"
+            Email = $"jose-{Guid.NewGuid()}@email.com"
         };
         var responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
         var usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
@@ -121,6 +126,7 @@ public class UsuariosIntegrationTests
         // Assert - verifica toda a resposta HTTP
         await Verify(response)
             .ScrubMember("dataCriacao")
-            .ScrubMember("id");
+            .ScrubMember("id")
+            .ScrubMember("email");
     }
 }

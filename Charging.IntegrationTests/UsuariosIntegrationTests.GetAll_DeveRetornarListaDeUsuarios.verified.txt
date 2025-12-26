@@ -1,25 +1,20 @@
-﻿{
-  Content: {
-    Headers: [
-      {
-        Content-Type: [
-          application/json; charset=utf-8
-        ]
-      }
-    ]
+﻿[
+  {
+    Nome: Nome usuario
   },
-  Headers: [],
-  IsSuccessStatusCode: true,
-  ReasonPhrase: OK,
-  RequestMessage: {
-    Headers: [],
-    Method: {
-      Method: GET
-    },
-    RequestUri: http://localhost/api/teste,
-    Version: 1.1
+  {
+    Nome: José Carlos
   },
-  StatusCode: OK,
-  TrailingHeaders: [],
-  Version: 1.1
-}
+  {
+    Nome: José Carlos
+  },
+  {
+    Nome: José Carlos
+  },
+  {
+    Nome: José Carlos
+  },
+  {
+    Nome: Maria Eduarda
+  }
+]

@@ -66,13 +66,13 @@ public class ApiFixture : IAsyncLifetime
         {
             try
             {
-                await dbContext.Database.MigrateAsync();
+                await dbContext.Database.EnsureCreatedAsync();
                 break; // Success
             }
             catch (SqlException ex)
             {
                 retries--;
-                if (retries == 0) throw new Exception("Migration failed after multiple retries.", ex);
+                if (retries == 0) throw new Exception("Database creation failed after multiple retries.", ex);
                 await Task.Delay(3000);
             }
         }

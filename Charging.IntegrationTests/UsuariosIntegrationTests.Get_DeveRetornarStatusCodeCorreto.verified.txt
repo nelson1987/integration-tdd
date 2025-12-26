@@ -16,7 +16,7 @@
     Method: {
       Method: GET
     },
-    RequestUri: http://localhost/api/teste/1,
+    RequestUri: http://localhost/api/usuarios/2,
     Version: 1.1
   },
   StatusCode: OK,
