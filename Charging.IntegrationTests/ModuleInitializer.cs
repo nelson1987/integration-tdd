@@ -10,12 +10,13 @@ public static class ModuleInitializer
     {
         // Configurações globais do Verify
         // VerifyHttp.Enable();
-
         // Serialização mais limpa
         VerifierSettings.SortPropertiesAlphabetically();
         VerifierSettings.SortJsonObjects();
 
         // Remove propriedades dinâmicas globalmente
         VerifierSettings.IgnoreMember<Usuario>(u => u.DataCriacao);
+        //Diretorio
+        UseProjectRelativeDirectory("verified");
     }
 }

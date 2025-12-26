@@ -6,7 +6,7 @@ Este é um projeto template em .NET 8.0 que demonstra a implementação de uma A
 
 ## 🏗️ Arquitetura
 
-O projeto está dividido em duas partes principais:
+O projeto está dividido em três partes principais:
 
 ### 1. **Charging.Api** - API Principal
 - API RESTful implementada com **ASP.NET Core 8.0**
@@ -22,6 +22,13 @@ O projeto está dividido em duas partes principais:
 - **Shouldly** para assertions mais legíveis
 - **WebApplicationFactory** para testes de integração da API
 
+### 3. **k6-tests** - Testes de Performance
+- Framework: **k6** (Grafana k6)
+- **Smoke Test:** Validação rápida (5 req/s, P95 < 100ms)
+- **Load Test:** Carga de produção (1000 usuários/min, P95 < 300ms)
+- **Stress Test:** Teste de limites e ponto de quebra
+- Relatórios HTML e JSON automatizados
+
 ## 🛠️ Tecnologias Utilizadas
 
 ### API
@@ -31,13 +38,18 @@ O projeto está dividido em duas partes principais:
 - SQL Server
 - Swagger/OpenAPI
 
-### Testes
+### Testes de Integração
 - xUnit 2.9.3
 - Microsoft.AspNetCore.Mvc.Testing 8.0.22
 - Testcontainers.MsSql 3.10.0
 - Verify 31.8.0
 - Shouldly 4.3.0
 - Coverlet (Code Coverage)
+
+### Testes de Performance
+- k6 (Grafana k6)
+- Scripts automatizados PowerShell
+- Geração de relatórios HTML/JSON
 
 ## 📦 Estrutura do Projeto
 
@@ -55,12 +67,21 @@ integration-tdd/
 │   └── Charging.Api.csproj
 │
 ├── Charging.IntegrationTests/
+│   ├── verified/                            # Snapshots do Verify
 │   ├── ApiFactory.cs                        # Factory para WebApplicationFactory
 │   ├── ApiFixture.cs                        # Fixture com TestContainers
 │   ├── GuidCollectionFixture.cs             # Collection fixture do xUnit
 │   ├── GuidFixture.cs                       # Fixture auxiliar
 │   ├── UsuariosIntegrationTests.cs          # Testes de integração principais
 │   └── Charging.IntegrationTests.csproj
+│
+├── k6-tests/                                # 🆕 Testes de Performance
+│   ├── smoke-test.js                        # Teste rápido (5 req/s)
+│   ├── load-test.js                         # Teste de carga (1000 users/min)
+│   ├── stress-test.js                       # Teste de estresse
+│   ├── run-tests.ps1                        # Script de automação
+│   ├── README.md                            # Documentação completa
+│   └── QUICKSTART.md                        # Guia rápido
 │
 └── Charging.sln
 ```
@@ -181,6 +202,48 @@ dotnet test
 dotnet test --collect:"XPlat Code Coverage"
 ```
 
+### Executar Testes de Performance
+
+**Pré-requisito:** Instalar k6
+
+```powershell
+# Windows
+winget install k6
+```
+
+**Executar todos os testes:**
+
+```powershell
+cd k6-tests
+.\run-tests.ps1
+```
+
+**Executar teste específico:**
+
+```powershell
+# Smoke test (rápido - 1 segundo)
+.\run-tests.ps1 -TestType smoke
+
+# Load test (completo - 2 minutos)
+.\run-tests.ps1 -TestType load
+
+# Stress test (intenso - 10 minutos)
+.\run-tests.ps1 -TestType stress
+```
+
+**Ou executar diretamente:**
+
+```powershell
+cd k6-tests
+k6 run smoke-test.js   # 5 req/s, P95 < 100ms
+k6 run load-test.js    # 1000 users/min, P95 < 300ms
+k6 run stress-test.js  # Teste de limites
+```
+
+📊 **Relatórios:** O load test gera automaticamente `report-load.html` com visualização detalhada.
+
+📖 **Documentação completa:** Veja [k6-tests/README.md](k6-tests/README.md) e [k6-tests/QUICKSTART.md](k6-tests/QUICKSTART.md)
+
 ### Restaurar Dependências
 
 ```powershell
@@ -214,13 +277,35 @@ Os testes criam automaticamente um container SQL Server com:
 - **Porta**: Dinâmica (gerenciada pelo TestContainers)
 - **Banco de dados**: Criado e migrado automaticamente
 
+## 🎯 Objetivos de Performance
+
+### Requisitos Atuais
+
+| Teste | Objetivo | Threshold | Status |
+|-------|----------|-----------|--------|
+| **Smoke** | 5 req/segundo | P95 < 100ms | ✅ |
+| **Load** | 1000 usuários/minuto | P95 < 300ms | ✅ |
+| **Stress** | Identificar limites | P95 < 500ms | 🔄 |
+
+### Métricas de Sucesso
+
+- ✅ **P95 < 200ms** - Excelente
+- ⚠️ **P95 200-400ms** - Aceitável
+- ❌ **P95 > 400ms** - Requer otimização
+
 ## 📝 Padrões e Boas Práticas
 
-### Testes
+### Testes de Integração
 - ✅ Isolamento total entre testes usando containers descartáveis
 - ✅ Snapshot testing para validação de contratos
 - ✅ Nomenclatura clara seguindo padrão: `Method_Should_ExpectedBehavior`
 - ✅ Arrange-Act-Assert pattern
+
+### Testes de Performance
+- ✅ Smoke test antes de cada release
+- ✅ Load test em staging antes de produção
+- ✅ Monitoramento contínuo de SLAs
+- ✅ Relatórios automatizados com thresholds
 
 ### Código
 - ✅ Minimal APIs para simplicidade

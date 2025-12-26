@@ -1,0 +1,135 @@
+# Exemplo de integração CI/CD com GitHub Actions
+# Coloque este arquivo em: .github/workflows/performance-tests.yml
+
+name: Performance Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Executa diariamente às 2h da manhã
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Permite execução manual
+
+jobs:
+  performance-tests:
+    runs-on: ubuntu-latest
+    
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: "yourStrong(!)Password123"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'yourStrong(!)Password123' -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build API
+      run: dotnet build --no-restore
+
+    - name: Start API
+      run: |
+        cd Charging.Api
+        dotnet run &
+        echo $! > api.pid
+        sleep 10
+      env:
+        ASPNETCORE_ENVIRONMENT: Development
+        ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=ChargingTest;User Id=sa;Password=yourStrong(!)Password123;TrustServerCertificate=True;"
+
+    - name: Wait for API to be ready
+      run: |
+        timeout 30 bash -c 'until curl -s http://localhost:5000/api/usuarios; do sleep 1; done'
+
+    - name: Setup k6
+      run: |
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+
+    - name: Run Smoke Test
+      run: |
+        cd k6-tests
+        k6 run smoke-test.js
+      env:
+        BASE_URL: http://localhost:5000
+
+    - name: Run Load Test
+      run: |
+        cd k6-tests
+        k6 run load-test.js
+      env:
+        BASE_URL: http://localhost:5000
+
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: k6-test-results
+        path: |
+          k6-tests/summary-*.json
+          k6-tests/report-*.html
+
+    - name: Stop API
+      if: always()
+      run: |
+        if [ -f Charging.Api/api.pid ]; then
+          kill $(cat Charging.Api/api.pid) || true
+        fi
+
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          try {
+            const loadResults = JSON.parse(fs.readFileSync('k6-tests/summary-load.json', 'utf8'));
+            const metrics = loadResults.metrics;
+            
+            const comment = `## 🚀 Performance Test Results
+            
+            | Métrica | Valor |
+            |---------|-------|
+            | Total de Requisições | ${metrics.http_reqs.values.count} |
+            | Taxa de Requisições | ${metrics.http_reqs.values.rate.toFixed(2)}/s |
+            | Tempo Médio | ${metrics.http_req_duration.values.avg.toFixed(2)}ms |
+            | P95 | ${metrics.http_req_duration.values['p(95)'].toFixed(2)}ms |
+            | P99 | ${metrics.http_req_duration.values['p(99)'].toFixed(2)}ms |
+            | Taxa de Erro | ${((metrics.errors?.values.rate || 0) * 100).toFixed(2)}% |
+            
+            ${metrics.http_req_duration.values['p(95)'] < 300 ? '✅' : '❌'} Threshold P95 < 300ms
+            ${((metrics.errors?.values.rate || 0) * 100) < 5 ? '✅' : '❌'} Threshold Taxa de Erro < 5%
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          } catch (error) {
+            console.log('Não foi possível comentar os resultados:', error);
+          }
+
