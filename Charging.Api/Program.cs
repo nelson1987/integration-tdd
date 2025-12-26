@@ -13,6 +13,22 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Criar o banco de dados automaticamente
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    try
+    {
+        context.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Erro ao criar o banco de dados");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -20,7 +36,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Comentado para funcionar no Docker sem HTTPS
+// app.UseHttpsRedirection();
 
 app.MapGet("/api/usuarios/{id}",
         async ([FromRoute] int id, [FromServices] ApplicationDbContext db) =>
