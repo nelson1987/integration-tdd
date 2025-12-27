@@ -1,17 +1,5 @@
 ﻿[
   {
-    Nome: Nome usuario
-  },
-  {
-    Nome: José Carlos
-  },
-  {
-    Nome: José Carlos
-  },
-  {
-    Nome: José Carlos
-  },
-  {
     Nome: José Carlos
   },
   {

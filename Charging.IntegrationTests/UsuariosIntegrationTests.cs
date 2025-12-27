@@ -5,14 +5,23 @@ using Charging.Application.Models;
 namespace Charging.IntegrationTests;
 
 [Collection("GuidCollection")]
-public class UsuariosIntegrationTests
+public class UsuariosIntegrationTests : IAsyncLifetime
 {
     private readonly HttpClient _client;
+    private readonly ApiFixture _fixture;
 
     public UsuariosIntegrationTests(ApiFixture fixture)
     {
+        _fixture = fixture;
         _client = fixture._client;
     }
+
+    public async Task InitializeAsync()
+    {
+        await _fixture.ResetDatabaseAsync();
+    }
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Post_DeveCriarUmNovoUsuario()

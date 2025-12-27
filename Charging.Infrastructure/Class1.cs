@@ -19,6 +19,7 @@ public static class Dependencies
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+        services.AddScoped<IDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         return services;
     }

@@ -24,6 +24,16 @@ public class ApiFixture : IAsyncLifetime
     public ApplicationDbContext _context = null!;
     private IServiceScope _scope = null!;
 
+    public async Task ResetDatabaseAsync()
+    {
+        // Limpa todos os dados das tabelas
+        _context.Usuarios.RemoveRange(_context.Usuarios);
+        await _context.SaveChangesAsync();
+        
+        // Reseta a identidade da tabela para começar do 1
+        await _context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('Usuarios', RESEED, 0)");
+    }
+
     public async Task InitializeAsync()
     {
         try
