@@ -1,5 +1,10 @@
-﻿namespace Charging.Domain;
+﻿using Charging.Application.Models;
 
-public class Class1
+namespace Charging.Domain;
+
+public interface IUsuarioRepository
 {
+    Task<Usuario?> FindAsync(int id);
+    Task<List<Usuario>> ListAsync();
+    Task AddAsync(Usuario usuario);
 }

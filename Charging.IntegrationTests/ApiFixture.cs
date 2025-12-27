@@ -1,24 +1,28 @@
-﻿using System;
-using System.Threading.Tasks;
-using Charging.Api.Data;
+﻿using Charging.Api;
+using Charging.Infrastructure.Data;
+
+using DotNet.Testcontainers.Containers;
+
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+
 using Testcontainers.MsSql;
 
 namespace Charging.IntegrationTests;
 
 public class ApiFixture : IAsyncLifetime
 {
-    public HttpClient _client = null!;
-    public ApplicationDbContext _context = null!;
-    private IServiceScope _scope = null!;
-
     private readonly MsSqlContainer _msSqlContainer = new MsSqlBuilder()
         .WithPassword("yourStrong(!)Password123")
         .Build();
+
+    public HttpClient _client = null!;
+    public ApplicationDbContext _context = null!;
+    private IServiceScope _scope = null!;
 
     public async Task InitializeAsync()
     {
@@ -35,13 +39,10 @@ public class ApiFixture : IAsyncLifetime
         }
 
         // Additional health check using sqlcmd inside the container
-        var execResult = await _msSqlContainer.ExecAsync(new[]
+        ExecResult execResult = await _msSqlContainer.ExecAsync(new[]
         {
-            "/opt/mssql-tools/bin/sqlcmd",
-            "-S", "localhost",
-            "-U", "sa",
-            "-P", "yourStrong(!)Password123",
-            "-Q", "SELECT 1"
+            "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "yourStrong(!)Password123", "-Q",
+            "SELECT 1"
         });
 
         if (execResult.ExitCode != 0)
@@ -50,18 +51,18 @@ public class ApiFixture : IAsyncLifetime
                 $"SQL Server is not ready. sqlcmd check failed with exit code {execResult.ExitCode}. Stderr: {execResult.Stderr}. Stdout: {execResult.Stdout}");
         }
 
-        var connectionString = _msSqlContainer.GetConnectionString();
+        string? connectionString = _msSqlContainer.GetConnectionString();
 
         // On some Windows/Docker setups, localhost can be problematic.
         // Let's try forcing the IP address to see if it resolves the connection refusal.
         connectionString = connectionString.Replace("localhost", "127.0.0.1");
 
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer(connectionString)
             .Options;
-        await using var dbContext = new ApplicationDbContext(options);
+        await using ApplicationDbContext dbContext = new(options);
 
-        var retries = 3;
+        int retries = 3;
         while (retries > 0)
         {
             try
@@ -72,12 +73,16 @@ public class ApiFixture : IAsyncLifetime
             catch (SqlException ex)
             {
                 retries--;
-                if (retries == 0) throw new Exception("Database creation failed after multiple retries.", ex);
+                if (retries == 0)
+                {
+                    throw new Exception("Database creation failed after multiple retries.", ex);
+                }
+
                 await Task.Delay(3000);
             }
         }
 
-        var factory = new ApiFactory().WithWebHostBuilder(builder =>
+        WebApplicationFactory<Program> factory = new ApiFactory().WithWebHostBuilder(builder =>
         {
             builder.ConfigureTestServices(services =>
             {

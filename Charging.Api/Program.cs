@@ -1,33 +1,32 @@
-using Charging.Api.Data;
-using Charging.Api.Models;
+using Charging.Application.Models;
+using Charging.Domain;
+using Charging.Infrastructure;
+
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Criar o banco de dados automaticamente
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    try
-    {
-        context.Database.EnsureCreated();
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Erro ao criar o banco de dados");
-    }
-}
+// using (var scope = app.Services.CreateScope())
+// {
+//     var services = scope.ServiceProvider;
+//     var context = services.GetRequiredService<ApplicationDbContext>();
+//     try
+//     {
+//         context.Database.EnsureCreated();
+//     }
+//     catch (Exception ex)
+//     {
+//         var logger = services.GetRequiredService<ILogger<Charging.Api.Program>>();
+//         logger.LogError(ex, "Erro ao criar o banco de dados");
+//     }
+// }
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -40,9 +39,9 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 
 app.MapGet("/api/usuarios/{id}",
-        async ([FromRoute] int id, [FromServices] ApplicationDbContext db) =>
+        async ([FromRoute] int id, [FromServices] IUsuarioRepository usuarioRepository) =>
         {
-            var usuario = await db.Usuarios.FindAsync(id); // is { } usuario
+            Usuario? usuario = await usuarioRepository.FindAsync(id);
             return usuario != null
                 ? Results.Ok(usuario)
                 : Results.NotFound();
@@ -51,14 +50,13 @@ app.MapGet("/api/usuarios/{id}",
     .WithOpenApi();
 
 app.MapGet("/api/usuarios",
-        async (ApplicationDbContext db) => await db.Usuarios.ToListAsync())
+        async (IUsuarioRepository db) => await db.ListAsync())
     .WithName("GetUsuarios")
     .WithOpenApi();
 
-app.MapPost("/api/usuarios", async (Usuario usuario, ApplicationDbContext db) =>
+app.MapPost("/api/usuarios", async (Usuario usuario, IUsuarioRepository db) =>
     {
-        db.Usuarios.Add(usuario);
-        await db.SaveChangesAsync();
+        await db.AddAsync(usuario);
         return Results.Created($"/api/usuarios/{usuario.Id}", usuario);
     })
     .WithName("CreateUsuario")
@@ -66,6 +64,9 @@ app.MapPost("/api/usuarios", async (Usuario usuario, ApplicationDbContext db) =>
 
 await app.RunAsync();
 
-public partial class Program
+namespace Charging.Api
 {
+    public class Program
+    {
+    }
 }

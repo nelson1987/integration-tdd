@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
-using Charging.Api.Models;
+
+using Charging.Application.Models;
 
 namespace Charging.IntegrationTests;
 
@@ -17,15 +18,11 @@ public class UsuariosIntegrationTests
     public async Task Post_DeveCriarUmNovoUsuario()
     {
         // Arrange
-        var novoUsuario = new Usuario
-        {
-            Nome = "José Carlos",
-            Email = $"jose-{Guid.NewGuid()}@email.com"
-        };
+        Usuario novoUsuario = new() { Nome = "José Carlos", Email = $"jose-{Guid.NewGuid()}@email.com" };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
-        var usuarioCriado = await response.Content.ReadFromJsonAsync<Usuario>();
+        HttpResponseMessage response = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
+        Usuario? usuarioCriado = await response.Content.ReadFromJsonAsync<Usuario>();
 
         // Assert
         await Verify(usuarioCriado)
@@ -38,17 +35,13 @@ public class UsuariosIntegrationTests
     public async Task Get_DeveRetornarUsuarioPorId()
     {
         // Arrange
-        var novoUsuario = new Usuario
-        {
-            Nome = "José Carlos",
-            Email = $"jose-{Guid.NewGuid()}@email.com"
-        };
-        var responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
-        var usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
+        Usuario novoUsuario = new() { Nome = "José Carlos", Email = $"jose-{Guid.NewGuid()}@email.com" };
+        HttpResponseMessage responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
+        Usuario? usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
 
         // Act
-        var response = await _client.GetAsync($"/api/usuarios/{usuarioCriado!.Id}");
-        var usuario = await response.Content.ReadFromJsonAsync<Usuario>();
+        HttpResponseMessage response = await _client.GetAsync($"/api/usuarios/{usuarioCriado!.Id}");
+        Usuario? usuario = await response.Content.ReadFromJsonAsync<Usuario>();
 
         // Assert
         await Verify(usuario)
@@ -60,23 +53,15 @@ public class UsuariosIntegrationTests
     public async Task GetAll_DeveRetornarListaDeUsuarios()
     {
         // Arrange
-        var guid = Guid.NewGuid();
-        var novoUsuario1 = new Usuario
-        {
-            Nome = "José Carlos",
-            Email = $"jose-{guid}@email.com"
-        };
-        var novoUsuario2 = new Usuario
-        {
-            Nome = "Maria Eduarda",
-            Email = $"maria-{guid}@email.com"
-        };
+        Guid guid = Guid.NewGuid();
+        Usuario novoUsuario1 = new() { Nome = "José Carlos", Email = $"jose-{guid}@email.com" };
+        Usuario novoUsuario2 = new() { Nome = "Maria Eduarda", Email = $"maria-{guid}@email.com" };
         await _client.PostAsJsonAsync("/api/usuarios", novoUsuario1);
         await _client.PostAsJsonAsync("/api/usuarios", novoUsuario2);
 
         // Act
-        var response = await _client.GetAsync("/api/usuarios");
-        var usuarios = await response.Content.ReadFromJsonAsync<List<Usuario>>();
+        HttpResponseMessage response = await _client.GetAsync("/api/usuarios");
+        List<Usuario>? usuarios = await response.Content.ReadFromJsonAsync<List<Usuario>>();
 
         // Assert
         await Verify(usuarios)
@@ -89,17 +74,13 @@ public class UsuariosIntegrationTests
     public async Task Get_DeveRetornarJsonCompleto()
     {
         // Arrange
-        var novoUsuario = new Usuario
-        {
-            Nome = "José Carlos",
-            Email = $"jose-{Guid.NewGuid()}@email.com"
-        };
-        var responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
-        var usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
+        Usuario novoUsuario = new() { Nome = "José Carlos", Email = $"jose-{Guid.NewGuid()}@email.com" };
+        HttpResponseMessage responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
+        Usuario? usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
 
         // Act
-        var response = await _client.GetAsync($"/api/usuarios/{usuarioCriado!.Id}");
-        var json = await response.Content.ReadAsStringAsync();
+        HttpResponseMessage response = await _client.GetAsync($"/api/usuarios/{usuarioCriado!.Id}");
+        string json = await response.Content.ReadAsStringAsync();
 
         // Assert - verifica o JSON bruto
         await VerifyJson(json)
@@ -112,16 +93,12 @@ public class UsuariosIntegrationTests
     public async Task Get_DeveRetornarStatusCodeCorreto()
     {
         // Arrange
-        var novoUsuario = new Usuario
-        {
-            Nome = "José Carlos",
-            Email = $"jose-{Guid.NewGuid()}@email.com"
-        };
-        var responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
-        var usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
+        Usuario novoUsuario = new() { Nome = "José Carlos", Email = $"jose-{Guid.NewGuid()}@email.com" };
+        HttpResponseMessage responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
+        Usuario? usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
 
         // Act
-        var response = await _client.GetAsync($"/api/usuarios/{usuarioCriado!.Id}");
+        HttpResponseMessage response = await _client.GetAsync($"/api/usuarios/{usuarioCriado!.Id}");
 
         // Assert - verifica toda a resposta HTTP
         await Verify(response)

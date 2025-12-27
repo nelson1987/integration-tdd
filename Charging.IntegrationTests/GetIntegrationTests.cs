@@ -1,10 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 
-using Charging.Api.Data;
-using Charging.Api.Models;
-
-using Microsoft.EntityFrameworkCore;
+using Charging.Application.Models;
+using Charging.Infrastructure.Data;
 
 using Shouldly;
 
@@ -25,15 +23,13 @@ public class GetIntegrationTests
     [Fact]
     public async Task ListarTestes_QuandoTesteExistir_DeveRetornarListaTestes()
     {
-        await _context.Usuarios.AddAsync(new Usuario()
+        await _context.Usuarios.AddAsync(new Usuario
         {
-            Email = $"email-{Guid.NewGuid()}@email.com", 
-            Nome = "Nome usuario", 
-            DataCriacao = DateTime.UtcNow
+            Email = $"email-{Guid.NewGuid()}@email.com", Nome = "Nome usuario", DataCriacao = DateTime.UtcNow
         });
         await _context.SaveChangesAsync();
-        
-        var result = await _client.GetAsync("/api/usuarios");
+
+        HttpResponseMessage result = await _client.GetAsync("/api/usuarios");
         result.EnsureSuccessStatusCode();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -41,7 +37,7 @@ public class GetIntegrationTests
     [Fact]
     public async Task ListarTestes_QuandoTesteNaoExistir_DeveRetornarNotFound()
     {
-        var result = await _client.GetAsync("/api/usuarios");
+        HttpResponseMessage result = await _client.GetAsync("/api/usuarios");
         result.EnsureSuccessStatusCode();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -49,9 +45,9 @@ public class GetIntegrationTests
     [Fact]
     public async Task ListarTestes_QuandoTesteExistir_DeveRetornarListaTestesComResultado()
     {
-        var result = await _client.GetAsync("/api/usuarios");
+        HttpResponseMessage result = await _client.GetAsync("/api/usuarios");
         result.EnsureSuccessStatusCode();
-        var response = await result.Content
+        List<Usuario>? response = await result.Content
             .ReadFromJsonAsync<List<Usuario>>();
         response.ShouldNotBeEmpty();
         response.ShouldNotBeNull();

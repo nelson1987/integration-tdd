@@ -1,13 +1,13 @@
 ﻿using Xunit.Abstractions;
-namespace Charging.IntegrationTests;
 
+namespace Charging.IntegrationTests;
 
 [Collection("GuidCollection")]
 public class IntegrationTests1
 {
-    private readonly ITestOutputHelper _output;
-    private readonly Guid _guid;
     private readonly HttpClient _client;
+    private readonly Guid _guid;
+    private readonly ITestOutputHelper _output;
 
     public IntegrationTests1(ITestOutputHelper output, GuidFixture guidFixture, ApiFixture apiFixture)
     {

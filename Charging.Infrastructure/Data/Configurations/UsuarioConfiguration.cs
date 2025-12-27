@@ -1,8 +1,9 @@
-using Charging.Api.Models;
+using Charging.Application.Models;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Charging.Api.Data.Configurations;
+namespace Charging.Infrastructure.Data.Configurations;
 
 public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
 {

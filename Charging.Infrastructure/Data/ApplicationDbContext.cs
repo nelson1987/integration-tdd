@@ -1,10 +1,12 @@
 using System.Reflection;
-using Charging.Api.Models;
+
+using Charging.Application.Models;
+
 using Microsoft.EntityFrameworkCore;
 
-namespace Charging.Api.Data;
+namespace Charging.Infrastructure.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : DbContext, IDbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

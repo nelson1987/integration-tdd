@@ -5,8 +5,8 @@ namespace Charging.IntegrationTests;
 [Collection("GuidCollection")]
 public class IntegrationTests2
 {
-    private readonly ITestOutputHelper _output;
     private readonly Guid _guid;
+    private readonly ITestOutputHelper _output;
 
     public IntegrationTests2(ITestOutputHelper output, GuidFixture guidFixture)
     {

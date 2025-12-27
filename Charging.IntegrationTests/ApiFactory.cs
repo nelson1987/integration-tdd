@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Charging.Api;
+
+using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Charging.IntegrationTests;
 

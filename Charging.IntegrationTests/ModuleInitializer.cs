@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
-using Charging.Api.Models;
+
+using Charging.Application.Models;
 
 namespace Charging.IntegrationTests;
 
