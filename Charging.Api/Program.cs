@@ -1,3 +1,4 @@
+using Charging.Application;
 using Charging.Domain;
 using Charging.Domain.Entities;
 using Charging.Domain.Repositories;
@@ -7,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services
+    .AddApplication()
+    .AddInfrastructure(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -42,6 +45,7 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/api/usuarios/{id}",
         async ([FromRoute] int id, [FromServices] IUsuarioRepository usuarioRepository) =>
         {
+            //var query = new BuscaUsuarioQuery(id);
             Usuario? usuario = await usuarioRepository.FindAsync(id);
             return usuario != null
                 ? Results.Ok(usuario)
@@ -55,9 +59,12 @@ app.MapGet("/api/usuarios",
     .WithName("GetUsuarios")
     .WithOpenApi();
 
-app.MapPost("/api/usuarios", async (Usuario usuario, IUsuarioRepository db) =>
+app.MapPost("/api/usuarios", async (
+        [FromBody] InclusaoUsuarioCommand command,
+        [FromServices] IInclusaoUsuarioHandler db,
+        CancellationToken cancellationToken) =>
     {
-        await db.AddAsync(usuario);
+        var usuario = await db.Handle(command, cancellationToken);
         return Results.Created($"/api/usuarios/{usuario.Id}", usuario);
     })
     .WithName("CreateUsuario")

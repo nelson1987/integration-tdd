@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Charging.Application\Charging.Application.csproj"/>
         <ProjectReference Include="..\Charging.Infrastructure\Charging.Infrastructure.csproj"/>
     </ItemGroup>
 

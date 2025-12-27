@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 
+using Charging.Application;
 using Charging.Domain.Entities;
 
 namespace Charging.IntegrationTests;
@@ -27,7 +28,7 @@ public class UsuariosIntegrationTests : IAsyncLifetime
     public async Task Post_DeveCriarUmNovoUsuario()
     {
         // Arrange
-        Usuario novoUsuario = new() { Nome = "José Carlos", Email = $"jose-{Guid.NewGuid()}@email.com" };
+        InclusaoUsuarioCommand novoUsuario = new(Nome: "José Carlos", Email: $"jose-{Guid.NewGuid()}@email.com");
 
         // Act
         HttpResponseMessage response = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
@@ -44,9 +45,11 @@ public class UsuariosIntegrationTests : IAsyncLifetime
     public async Task Get_DeveRetornarUsuarioPorId()
     {
         // Arrange
-        Usuario novoUsuario = new() { Nome = "José Carlos", Email = $"jose-{Guid.NewGuid()}@email.com" };
+        InclusaoUsuarioCommand novoUsuario =
+            new InclusaoUsuarioCommand("José Carlos", $"jose-{Guid.NewGuid()}@email.com");
+
         HttpResponseMessage responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
-        Usuario? usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
+        InclusaoUsuarioResponse? usuarioCriado = await responsePost.Content.ReadFromJsonAsync<InclusaoUsuarioResponse>();
 
         // Act
         HttpResponseMessage response = await _client.GetAsync($"/api/usuarios/{usuarioCriado!.Id}");
@@ -83,9 +86,9 @@ public class UsuariosIntegrationTests : IAsyncLifetime
     public async Task Get_DeveRetornarJsonCompleto()
     {
         // Arrange
-        Usuario novoUsuario = new() { Nome = "José Carlos", Email = $"jose-{Guid.NewGuid()}@email.com" };
+        InclusaoUsuarioCommand novoUsuario = new("José Carlos", Email: $"jose-{Guid.NewGuid()}@email.com");
         HttpResponseMessage responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
-        Usuario? usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
+        InclusaoUsuarioResponse? usuarioCriado = await responsePost.Content.ReadFromJsonAsync<InclusaoUsuarioResponse>();
 
         // Act
         HttpResponseMessage response = await _client.GetAsync($"/api/usuarios/{usuarioCriado!.Id}");
@@ -102,9 +105,9 @@ public class UsuariosIntegrationTests : IAsyncLifetime
     public async Task Get_DeveRetornarStatusCodeCorreto()
     {
         // Arrange
-        Usuario novoUsuario = new() { Nome = "José Carlos", Email = $"jose-{Guid.NewGuid()}@email.com" };
+        InclusaoUsuarioCommand novoUsuario = new(Nome: "José Carlos", Email: $"jose-{Guid.NewGuid()}@email.com");
         HttpResponseMessage responsePost = await _client.PostAsJsonAsync("/api/usuarios", novoUsuario);
-        Usuario? usuarioCriado = await responsePost.Content.ReadFromJsonAsync<Usuario>();
+        InclusaoUsuarioResponse? usuarioCriado = await responsePost.Content.ReadFromJsonAsync<InclusaoUsuarioResponse>();
 
         // Act
         HttpResponseMessage response = await _client.GetAsync($"/api/usuarios/{usuarioCriado!.Id}");
