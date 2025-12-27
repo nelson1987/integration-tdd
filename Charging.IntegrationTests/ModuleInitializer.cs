@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-using Charging.Application.Models;
+using Charging.Domain.Entities;
 
 namespace Charging.IntegrationTests;
 

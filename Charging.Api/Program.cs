@@ -1,5 +1,6 @@
-using Charging.Application.Models;
 using Charging.Domain;
+using Charging.Domain.Entities;
+using Charging.Domain.Repositories;
 using Charging.Infrastructure;
 
 using Microsoft.AspNetCore.Mvc;

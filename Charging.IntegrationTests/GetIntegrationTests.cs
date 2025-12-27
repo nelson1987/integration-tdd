@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 
-using Charging.Application.Models;
+using Charging.Domain.Entities;
 using Charging.Infrastructure.Data;
 
 using Shouldly;
@@ -34,7 +34,9 @@ public class GetIntegrationTests : IAsyncLifetime
     {
         await _context.Usuarios.AddAsync(new Usuario
         {
-            Email = $"email-{Guid.NewGuid()}@email.com", Nome = "Nome usuario", DataCriacao = DateTime.UtcNow
+            Email = $"email-{Guid.NewGuid()}@email.com",
+            Nome = "Nome usuario",
+            DataCriacao = DateTime.UtcNow
         });
         await _context.SaveChangesAsync();
 
@@ -56,7 +58,9 @@ public class GetIntegrationTests : IAsyncLifetime
     {
         await _context.Usuarios.AddAsync(new Usuario
         {
-            Email = $"email-{Guid.NewGuid()}@email.com", Nome = "Nome usuario", DataCriacao = DateTime.UtcNow
+            Email = $"email-{Guid.NewGuid()}@email.com",
+            Nome = "Nome usuario",
+            DataCriacao = DateTime.UtcNow
         });
         await _context.SaveChangesAsync();
 

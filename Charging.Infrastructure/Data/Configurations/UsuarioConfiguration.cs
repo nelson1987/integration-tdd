@@ -1,4 +1,4 @@
-using Charging.Application.Models;
+using Charging.Domain.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

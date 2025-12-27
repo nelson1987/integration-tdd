@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
 
-using Charging.Application.Models;
+using Charging.Domain.Entities;
 
 namespace Charging.IntegrationTests;
 

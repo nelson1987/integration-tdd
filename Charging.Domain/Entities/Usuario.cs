@@ -1,4 +1,4 @@
-namespace Charging.Application.Models;
+namespace Charging.Domain.Entities;
 
 public class Usuario
 {

@@ -1,6 +1,6 @@
-﻿using Charging.Application.Models;
+﻿using Charging.Domain.Entities;
 
-namespace Charging.Domain;
+namespace Charging.Domain.Repositories;
 
 public interface IUsuarioRepository
 {

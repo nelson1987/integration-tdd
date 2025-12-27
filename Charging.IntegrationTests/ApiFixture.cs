@@ -29,7 +29,7 @@ public class ApiFixture : IAsyncLifetime
         // Limpa todos os dados das tabelas
         _context.Usuarios.RemoveRange(_context.Usuarios);
         await _context.SaveChangesAsync();
-        
+
         // Reseta a identidade da tabela para começar do 1
         await _context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('Usuarios', RESEED, 0)");
     }
